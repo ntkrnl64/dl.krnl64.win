@@ -389,28 +389,28 @@ function App() {
           const isFile = fileSystemItem.type === 'file';
           return (
             <div className={styles.actionButtons}>              {isFile ? (
-                <>
-                  <Button
-                    title="Download File"
-                    icon={<ArrowDownloadRegular />}
-                    appearance="subtle"
-                    as="a"
-                    href={(fileSystemItem as FileItem).url}
-                    download
-                  />                  <Button
-                    title="Copy Download URL"
-                    icon={<LinkRegular />}
-                    appearance="subtle"
-                    onClick={() => handleGetDownloadUrl((fileSystemItem as FileItem).url)}
-                  />
-                </>
-              ) : (
+              <>
                 <Button
-                  title="Download Folder Contents"
-                  icon={<ArrowDownloadFilled />}
+                  title="Download File"
+                  icon={<ArrowDownloadRegular />}
                   appearance="subtle"
-                  onClick={() => handleDownloadFolder(fileSystemItem as FolderItem)}
-                />)}
+                  as="a"
+                  href={(fileSystemItem as FileItem).url}
+                  download
+                />                  <Button
+                  title="Copy Download URL"
+                  icon={<LinkRegular />}
+                  appearance="subtle"
+                  onClick={() => handleGetDownloadUrl((fileSystemItem as FileItem).url)}
+                />
+              </>
+            ) : (
+              <Button
+                title="Download Folder Contents"
+                icon={<ArrowDownloadFilled />}
+                appearance="subtle"
+                onClick={() => handleDownloadFolder(fileSystemItem as FolderItem)}
+              />)}
             </div>
           );
         },
@@ -464,9 +464,7 @@ function App() {
                   <BreadcrumbButton
                     href="#"
                     onClick={() => setCurrentPath(pathSegments)}
-                    current={isLast}
-                    {...(index === 1 && { icon: <CalendarMonth /> })} // Add icon to second item, mimicking sample
-                  >
+                    current={isLast}>
                     {segment}
                   </BreadcrumbButton>
                 </BreadcrumbItem>

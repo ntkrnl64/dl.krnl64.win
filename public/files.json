@@ -4,25 +4,80 @@
     "name": "Nicrozoft",
     "children": [
       {
-        "type": "file",
-        "name": "Windows_11_Extended_ProfessionalWorkstation_v6.0_Basic_beta4_Nicrozoft.iso",
-        "size": "8.66GB",
-        "date": "2025-12-09",
-        "url": "/nz/w11ex/v6/basic/beta4"
+        "type": "folder",
+        "name": "Windows_10_Extended",
+        "children": [
+          {
+            "type": "folder",
+            "name": "v1",
+            "children": [
+              {
+                "type": "file",
+                "name": "Windows_10_Extended_ProfessionalWorkstation_v1.0_Nicrozoft.iso",
+                "size": "20.95GB",
+                "date": "2025-12-09",
+                "url": "/nz/w10ex/v1"
+              }
+            ]
+          }
+        ]
       },
       {
-        "type": "file",
-        "name": "Windows_11_Extended_ProfessionalWorkstation_v6.0_Full_beta6_esd_Nicrozoft.iso",
-        "size": "20.85GB",
-        "date": "2025-12-09",
-        "url": "/nz/w11ex/v6/full/beta6"
-      },
-      {
-        "type": "file",
-        "name": "Nicrozoft/Windows_11_Extended_ProfessionalWorkstation_v6.0_Full_beta6_wim_Nicrozoft.iso",
-        "size": "26.72GB",
-        "date": "2025-12-09",
-        "url": "/nz/w11ex/v6/full/beta6/wim"
+        "type": "folder",
+        "name": "Windows_11_Extended",
+        "children": [
+          {
+            "type": "folder",
+            "name": "v6.0",
+            "children": [
+              {
+                "type": "folder",
+                "name": "Basic",
+                "children": [
+                  {
+                    "type": "folder",
+                    "name": "beta4",
+                    "children": [
+                      {
+                        "type": "file",
+                        "name": "Windows_11_Extended_ProfessionalWorkstation_v6.0_Basic_beta4_Nicrozoft.iso",
+                        "size": "8.66GB",
+                        "date": "2025-12-09",
+                        "url": "/nz/w11ex/v6/basic/beta4"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "folder",
+                "name": "Full",
+                "children": [
+                  {
+                    "type": "folder",
+                    "name": "beta6",
+                    "children": [
+                      {
+                        "type": "file",
+                        "name": "Windows_11_Extended_ProfessionalWorkstation_v6.0_Full_beta6_esd_Nicrozoft.iso",
+                        "size": "20.85GB",
+                        "date": "2025-12-09",
+                        "url": "/nz/w11ex/v6/full/beta6"
+                      },
+                      {
+                        "type": "file",
+                        "name": "Nicrozoft/Windows_11_Extended_ProfessionalWorkstation_v6.0_Full_beta6_wim_Nicrozoft.iso",
+                        "size": "26.72GB",
+                        "date": "2025-12-09",
+                        "url": "/nz/w11ex/v6/full/beta6/wim"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     ]
   }
