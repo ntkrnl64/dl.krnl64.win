@@ -43,12 +43,7 @@ import {
   ImageRegular, // For images
   WeatherSunnyRegular, // For light mode icon
   WeatherMoonRegular, // For dark mode icon
-  CalendarMonthFilled,
-  CalendarMonthRegular,
-  bundleIcon,
 } from '@fluentui/react-icons';
-
-const CalendarMonth = bundleIcon(CalendarMonthFilled, CalendarMonthRegular);
 
 
 // Import types only
