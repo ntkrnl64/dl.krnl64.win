@@ -62,6 +62,8 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     ...shorthands.padding('10px'), // Default padding for small screens
     minHeight: '100vh',
+    position: 'relative',
+    zIndex: 0,
     // Background and color are handled by FluentProvider and theme
     '@media (min-width: 640px)': {
       ...shorthands.padding('20px'),
@@ -91,6 +93,9 @@ const useStyles = makeStyles({
   datagridContainer: {
     flexGrow: 1, // Allow DataGrid to take available height
     overflowX: 'auto', // Enable horizontal scrolling for DataGrid
+    '& [role="row"]': {
+      height: 'auto',
+    },
   },
   // Custom styles for DataGrid cells if needed, e.g., icon styling
   fileIcon: {
@@ -104,6 +109,15 @@ const useStyles = makeStyles({
     fontSize: '12px', // Default font size for small screens
     '@media (min-width: 640px)': {
       fontSize: '14px',
+    },
+  },
+  nameCell: {
+    maxWidth: '300px',
+    overflow: 'visible',
+    wordBreak: 'break-word',
+    whiteSpace: 'normal',
+    '@media (max-width: 640px)': {
+      maxWidth: '200px',
     },
   },
   siteTitleText: {
@@ -149,7 +163,6 @@ const getAllFileUrlsInFolder = (folder: FolderItem): string[] => {
 function App() {
   const styles = useStyles(); // Initialize v9 styles
 
-
   const [currentPath, setCurrentPath] = useState<string[]>(() => {
     const pathSegments = window.location.pathname.split('/').filter(Boolean);
     return pathSegments;
@@ -162,21 +175,10 @@ function App() {
     return savedTheme === 'dark';
   });
 
-  // --- Effect to update screenWidth on resize ---
-  // No longer needed after refactoring DataGrid responsiveness.
-  //
-  // const [screenWidth, setScreenWidth] = useState<number>(window.innerWidth);
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     setScreenWidth(window.innerWidth);
-  //   };
-  //   window.addEventListener('resize', handleResize);
-  //   return () => {
-  //     window.removeEventListener('resize', handleResize);
-  //   };
-  // }, []);
-  const [appConfig, setAppConfig] = useState<AppConfig>({ siteTitle: 'Loading...', favicon: '' });
+  // Dialog state for file details
+  const [copyMessage, setCopyMessage] = useState<string | null>(null);
 
+  const [appConfig, setAppConfig] = useState<AppConfig>({ siteTitle: 'Loading...', favicon: '' });
 
   // --- URL Routing: Update URL when currentPath changes ---
   useEffect(() => {
@@ -276,14 +278,45 @@ function App() {
     return currentLevel;
   };
 
+  // --- Find file by path ---
+  const getFileByPath = (path: string[], data: FileSystemItem[] | null): FileItem | null => {
+    if (!data || path.length === 0) return null;
+    
+    let currentLevel: FileSystemItem[] = data;
+    
+    // Navigate to parent folder
+    for (let i = 0; i < path.length - 1; i++) {
+      const folder = currentLevel.find(
+        (item) => item.type === 'folder' && item.name === path[i]
+      ) as FolderItem;
+      if (folder) {
+        currentLevel = folder.children;
+      } else {
+        return null;
+      }
+    }
+    
+    // Find the file
+    const fileName = path[path.length - 1];
+    const file = currentLevel.find(
+      (item) => item.type === 'file' && item.name === fileName
+    ) as FileItem;
+    
+    return file || null;
+  };
+
   const currentItems = getItemsForPath(currentPath, fileSystemData);
+  const currentFile = getFileByPath(currentPath, fileSystemData);
 
   // --- Action Handlers ---
-  const handleGetDownloadUrl = React.useCallback((url: string) => {
-    navigator.clipboard.writeText(url).then(() => {
-      alert(`Download URL copied to clipboard:\n${url}`);
+  const handleGetDownloadUrl = React.useCallback((file: FileItem) => {
+    const absoluteUrl = new URL(file.url, window.location.origin).href;
+    navigator.clipboard.writeText(absoluteUrl).then(() => {
+      setCopyMessage('链接已复制到剪贴板');
+      setTimeout(() => setCopyMessage(null), 3000);
     }).catch(err => {
-      alert(`Failed to copy URL: ${url}\nError: ${err}`);
+      setCopyMessage(`复制失败: ${String(err)}`);
+      setTimeout(() => setCopyMessage(null), 3000);
     });
   }, []);
 
@@ -354,13 +387,17 @@ function App() {
         renderHeaderCell: () => <Text>Name</Text>,
         renderCell: (item) => (
           <TableCellLayout media={item.name.icon}>
-            {item.actions.type === 'folder' ? (
-              <Link onClick={() => setCurrentPath([...currentPath, item.name.label])}>
-                {item.name.label}
-              </Link>
-            ) : (
-              <Text>{item.name.label}</Text>
-            )}
+            <div className={styles.nameCell} title={item.name.label}>
+              {item.actions.type === 'folder' ? (
+                <Link onClick={() => setCurrentPath([...currentPath, item.name.label])}>
+                  {item.name.label}
+                </Link>
+              ) : (
+                <Link onClick={() => setCurrentPath([...currentPath, item.name.label])}>
+                  {item.name.label}
+                </Link>
+              )}
+            </div>
           </TableCellLayout>
         ),
       }),
@@ -392,11 +429,6 @@ function App() {
                   as="a"
                   href={(fileSystemItem as FileItem).url}
                   download
-                />                  <Button
-                  title="Copy Download URL"
-                  icon={<LinkRegular />}
-                  appearance="subtle"
-                  onClick={() => handleGetDownloadUrl((fileSystemItem as FileItem).url)}
                 />
               </>
             ) : (
@@ -411,7 +443,7 @@ function App() {
         },
       }),
     ],
-    [styles, currentPath, setCurrentPath, handleGetDownloadUrl, handleDownloadFolder]
+    [styles, currentPath, setCurrentPath, handleDownloadFolder]
   );
 
   // --- Render Loading/Error States ---
@@ -469,31 +501,91 @@ function App() {
         </Breadcrumb>
       </div>
 
-      <div className={styles.datagridContainer}>
-        <DataGrid
-          items={dataGridItems}
-          columns={columns}
-        >
-          <DataGridHeader>
-            <DataGridRow>
-              {({ renderHeaderCell }) => (
-                <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
+      {currentFile ? (
+        // --- File Details Page ---
+        <div className={styles.datagridContainer}>
+
+          <div style={{ padding: '20px', backgroundColor: 'var(--colorNeutralBackground2)', borderRadius: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+              {currentFile.name.includes('.pdf') && <DocumentPdfRegular style={{ fontSize: '32px' }} />}
+              {(currentFile.name.includes('.jpg') || currentFile.name.includes('.jpeg') || currentFile.name.includes('.png')) && <ImageRegular style={{ fontSize: '32px' }} />}
+              {(currentFile.name.includes('.zip') || currentFile.name.includes('.rar')) && <FolderZipRegular style={{ fontSize: '32px' }} />}
+              {(currentFile.name.includes('.exe') || currentFile.name.includes('.msi')) && <AppsRegular style={{ fontSize: '32px' }} />}
+              {!currentFile.name.includes('.pdf') && !(currentFile.name.includes('.jpg') || currentFile.name.includes('.jpeg') || currentFile.name.includes('.png')) && !(currentFile.name.includes('.zip') || currentFile.name.includes('.rar')) && !(currentFile.name.includes('.exe') || currentFile.name.includes('.msi')) && <DocumentRegular style={{ fontSize: '32px' }} />}
+              <div>
+                <Text as="h1" size={700}>{currentFile.name}</Text>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: '16px', marginBottom: '24px' }}>
+              <Text weight="semibold">文件大小：</Text>
+              <Text>{currentFile.size}</Text>
+
+              <Text weight="semibold">修改日期：</Text>
+              <Text>{currentFile.date}</Text>
+
+              {currentFile.description && (
+                <>
+                  <Text weight="semibold">说明：</Text>
+                  <Text>{currentFile.description}</Text>
+                </>
               )}
-            </DataGridRow>
-          </DataGridHeader>
-          <DataGridBody<DataGridItem>>
-            {({ item, rowId }) => (
-              <DataGridRow<DataGridItem> key={rowId}>
-                {({ renderCell }) => (
-                  <DataGridCell>{renderCell(item)}</DataGridCell>
+            </div>
+
+            {copyMessage && (
+              <div style={{ padding: '12px', backgroundColor: 'var(--colorStatusSuccessBackground1)', borderRadius: '4px', marginBottom: '24px' }}>
+                <Text>{copyMessage}</Text>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <Button
+                appearance="primary"
+                icon={<ArrowDownloadRegular />}
+                as="a"
+                href={currentFile.url}
+                download
+              >
+                下载文件
+              </Button>
+              <Button
+                appearance="outline"
+                icon={<LinkRegular />}
+                onClick={() => handleGetDownloadUrl(currentFile)}
+              >
+                复制下载链接
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        // --- File List View ---
+        <div className={styles.datagridContainer}>
+          <DataGrid
+            items={dataGridItems}
+            columns={columns}
+          >
+            <DataGridHeader>
+              <DataGridRow>
+                {({ renderHeaderCell }) => (
+                  <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
                 )}
               </DataGridRow>
-            )}
-          </DataGridBody>
-        </DataGrid>
-      </div>
+            </DataGridHeader>
+            <DataGridBody<DataGridItem>>
+              {({ item, rowId }) => (
+                <DataGridRow<DataGridItem> key={rowId}>
+                  {({ renderCell }) => (
+                    <DataGridCell>{renderCell(item)}</DataGridCell>
+                  )}
+                </DataGridRow>
+              )}
+            </DataGridBody>
+          </DataGrid>
+        </div>
+      )}
 
-      {currentItems.length === 0 && !loading && (
+      {currentItems.length === 0 && !currentFile && !loading && (
         <Text style={{ marginTop: '10px' }}>This folder is empty.</Text>
       )}
 

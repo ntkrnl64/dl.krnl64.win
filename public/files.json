@@ -2,10 +2,12 @@
   {
     "type": "folder",
     "name": "Nicrozoft",
+    "description": "Nicrozoft 操作系统镜像",
     "children": [
       {
         "type": "folder",
         "name": "Windows_10_Extended",
+        "description": "Windows 10 扩展版本",
         "children": [
           {
             "type": "folder",
@@ -16,7 +18,8 @@
                 "name": "Windows_10_Extended_ProfessionalWorkstation_v1.0_Nicrozoft.iso",
                 "size": "20.95GB",
                 "date": "2025-12-09",
-                "url": "/nz/w10ex/v1"
+                "url": "/nz/w10ex/v1",
+                "description": "Windows 10 专业工作站版本 v1.0，包含扩展功能和优化"
               }
             ]
           }
@@ -25,6 +28,7 @@
       {
         "type": "folder",
         "name": "Windows_11_Extended",
+        "description": "Windows 11 扩展版本",
         "children": [
           {
             "type": "folder",
@@ -35,7 +39,8 @@
                 "name": "Windows_11_Extended_ProfessionalWorkstation_v5.1_Nicrozoft.iso",
                 "size": "21.20GB",
                 "date": "2025-12-09",
-                "url": "/nz/w11ex/v5.1"
+                "url": "/nz/w11ex/v5.1",
+                "description": "Windows 11 专业工作站版本 v5.1，稳定版本"
               }
             ]
           },
@@ -46,6 +51,7 @@
               {
                 "type": "folder",
                 "name": "Basic",
+                "description": "基础版本，最小化安装",
                 "children": [
                   {
                     "type": "folder",
@@ -56,7 +62,8 @@
                         "name": "Windows_11_Extended_ProfessionalWorkstation_v6.0_Basic_beta4_Nicrozoft.iso",
                         "size": "8.66GB",
                         "date": "2025-12-09",
-                        "url": "/nz/w11ex/v6/basic/beta4"
+                        "url": "/nz/w11ex/v6/basic/beta4",
+                        "description": "Windows 11 Extended v6.0 基础版 beta4，轻量级安装"
                       }
                     ]
                   }
@@ -65,6 +72,7 @@
               {
                 "type": "folder",
                 "name": "Full",
+                "description": "完整版本，包含所有功能",
                 "children": [
                   {
                     "type": "folder",
@@ -75,14 +83,16 @@
                         "name": "Windows_11_Extended_ProfessionalWorkstation_v6.0_Full_beta6_esd_Nicrozoft.iso",
                         "size": "20.85GB",
                         "date": "2025-12-09",
-                        "url": "/nz/w11ex/v6/full/beta6"
+                        "url": "/nz/w11ex/v6/full/beta6",
+                        "description": "Windows 11 Extended v6.0 完整版 beta6 (ESD 格式)"
                       },
                       {
                         "type": "file",
                         "name": "Nicrozoft/Windows_11_Extended_ProfessionalWorkstation_v6.0_Full_beta6_wim_Nicrozoft.iso",
                         "size": "26.72GB",
                         "date": "2025-12-09",
-                        "url": "/nz/w11ex/v6/full/beta6/wim"
+                        "url": "/nz/w11ex/v6/full/beta6/wim",
+                        "description": "Windows 11 Extended v6.0 完整版 beta6 (WIM 格式)"
                       }
                     ]
                   }
