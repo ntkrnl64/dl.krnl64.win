@@ -1,5 +1,9 @@
 {
   "siteTitle": "KrnlDL",
   "favicon": "/icon.svg",
-  "footerHtml": "Copyright © 2025 KrnlDL. Site under GPL v3 license or later, content as all rights reserved."
+  "footerHtml": "Copyright © 2025 KrnlDL. Site under GPL v3 license or later, content as all rights reserved.",
+  "downloadDialogTitle": "注意",
+  "downloadDialogContent": "NtKrnl 在此请求你将多线程下载器（IDM，迅雷，NDM等）关闭，以节省流量。",
+  "downloadDialogConfirmLabel": "我已关闭多线程下载器",
+  "downloadDialogEnableAfterSeconds": 3
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Text,
   Button,
@@ -12,6 +12,11 @@ import {
   TableCellLayout,
   type TableColumnDefinition,
   createTableColumn,
+  Dialog,
+  DialogSurface,
+  DialogTitle,
+  DialogBody,
+  DialogActions,
 } from '@fluentui/react-components';
 import {
   DocumentRegular,
@@ -40,6 +45,10 @@ interface FileListViewProps {
   isMobile: boolean;
   onNavigate: (path: string[]) => void;
   onDownloadFolder: (folder: FolderItem) => void;
+  downloadDialogTitle?: string;
+  downloadDialogContent?: string;
+  downloadDialogConfirmLabel?: string;
+  downloadDialogEnableAfterSeconds?: number;
 }
 
 export const FileListView: React.FC<FileListViewProps> = ({
@@ -48,8 +57,41 @@ export const FileListView: React.FC<FileListViewProps> = ({
   isMobile,
   onNavigate,
   onDownloadFolder,
+  downloadDialogTitle,
+  downloadDialogContent,
+  downloadDialogConfirmLabel,
+  downloadDialogEnableAfterSeconds,
 }) => {
   const styles = useStyles();
+  const [showDialog, setShowDialog] = useState(false);
+  const [selectedFileUrl, setSelectedFileUrl] = useState<string | null>(null);
+  const [selectedFolder, setSelectedFolder] = useState<FolderItem | null>(null);
+  const [remainingSeconds, setRemainingSeconds] = useState<number>(0);
+
+  useEffect(() => {
+    let timer: number | undefined;
+    if (showDialog) {
+      const start = downloadDialogEnableAfterSeconds && downloadDialogEnableAfterSeconds > 0 ? downloadDialogEnableAfterSeconds : 0;
+      setRemainingSeconds(start);
+      if (start > 0) {
+        timer = window.setInterval(() => {
+          setRemainingSeconds(prev => {
+            if (prev <= 1) {
+              if (timer) window.clearInterval(timer);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      }
+    } else {
+      setRemainingSeconds(0);
+    }
+
+    return () => {
+      if (timer) window.clearInterval(timer);
+    };
+  }, [showDialog, downloadDialogEnableAfterSeconds]);
 
   const mapToDataGridItem = (item: FileSystemItem): DataGridItem => {
     const isFolder = item.type === 'folder';
@@ -137,9 +179,7 @@ export const FileListView: React.FC<FileListViewProps> = ({
                         title="Download File"
                         icon={<ArrowDownloadRegular />}
                         appearance="subtle"
-                        as="a"
-                        href={(fileSystemItem as FileItem).url}
-                        download
+                        onClick={() => { setSelectedFileUrl((fileSystemItem as FileItem).url); setSelectedFolder(null); setShowDialog(true); }}
                       />
                     </>
                   ) : (
@@ -147,7 +187,7 @@ export const FileListView: React.FC<FileListViewProps> = ({
                       title="Download Folder Contents"
                       icon={<ArrowDownloadFilled />}
                       appearance="subtle"
-                      onClick={() => onDownloadFolder(fileSystemItem as FolderItem)}
+                      onClick={() => { setSelectedFolder(fileSystemItem as FolderItem); setSelectedFileUrl(null); setShowDialog(true); }}
                     />
                   )}
                 </div>
@@ -180,6 +220,36 @@ export const FileListView: React.FC<FileListViewProps> = ({
           )}
         </DataGridBody>
       </DataGrid>
+      <Dialog open={showDialog} onOpenChange={(_, data) => setShowDialog(data.open)}>
+        <DialogSurface>
+          <DialogTitle>{downloadDialogTitle || '下载'}</DialogTitle>
+          <DialogBody>
+            {downloadDialogContent || (selectedFileUrl ? '即将下载所选文件。' : selectedFolder ? `即将下载文件夹：${selectedFolder.name}` : '')}
+          </DialogBody>
+          <DialogActions>
+            <Button appearance="secondary" onClick={() => setShowDialog(false)}>取消</Button>
+            <Button
+              appearance="primary"
+              disabled={remainingSeconds > 0}
+              onClick={() => {
+                if (selectedFileUrl) {
+                  const a = document.createElement('a');
+                  a.href = selectedFileUrl;
+                  a.download = '';
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                } else if (selectedFolder) {
+                  onDownloadFolder(selectedFolder);
+                }
+                setShowDialog(false);
+              }}
+            >
+              {(downloadDialogConfirmLabel || '确定') + (remainingSeconds > 0 ? ` (${remainingSeconds}s)` : '')}
+            </Button>
+          </DialogActions>
+        </DialogSurface>
+      </Dialog>
     </div>
   );
 };

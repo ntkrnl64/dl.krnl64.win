@@ -29,6 +29,10 @@ interface AppConfig {
   siteTitle: string;
   favicon: string;
   footerHtml?: string;
+  downloadDialogTitle?: string;
+  downloadDialogContent?: string;
+  downloadDialogConfirmLabel?: string;
+  downloadDialogEnableAfterSeconds?: number;
 }
 
 // --- Helper to recursively get all file URLs in a folder ---
@@ -297,6 +301,10 @@ function App() {
           file={currentFile}
           copyMessage={copyMessage}
           onCopyDownloadUrl={handleGetDownloadUrl}
+          downloadDialogTitle={appConfig.downloadDialogTitle}
+          downloadDialogContent={appConfig.downloadDialogContent}
+          downloadDialogConfirmLabel={appConfig.downloadDialogConfirmLabel}
+          downloadDialogEnableAfterSeconds={appConfig.downloadDialogEnableAfterSeconds}
         />
       ) : (
         <FileListView
@@ -305,6 +313,10 @@ function App() {
           isMobile={isMobile}
           onNavigate={(newPath) => setCurrentPath(newPath)}
           onDownloadFolder={handleDownloadFolder}
+          downloadDialogTitle={appConfig.downloadDialogTitle}
+          downloadDialogContent={appConfig.downloadDialogContent}
+          downloadDialogConfirmLabel={appConfig.downloadDialogConfirmLabel}
+          downloadDialogEnableAfterSeconds={appConfig.downloadDialogEnableAfterSeconds}
         />
       )}
 

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Text, Button } from '@fluentui/react-components';
+import React, { useState, useEffect } from 'react';
+import { Text, Button, Dialog, DialogSurface, DialogTitle, DialogBody, DialogActions } from '@fluentui/react-components';
 import {
   DocumentRegular,
   DocumentPdfRegular,
@@ -16,14 +16,49 @@ interface FileDetailViewProps {
   file: FileItem;
   copyMessage: string | null;
   onCopyDownloadUrl: (file: FileItem) => void;
+  downloadDialogTitle?: string;
+  downloadDialogContent?: string;
+  downloadDialogConfirmLabel?: string;
+  downloadDialogEnableAfterSeconds?: number;
 }
 
 export const FileDetailView: React.FC<FileDetailViewProps> = ({
   file,
   copyMessage,
   onCopyDownloadUrl,
+  downloadDialogTitle,
+  downloadDialogContent,
+  downloadDialogConfirmLabel,
+  downloadDialogEnableAfterSeconds,
 }) => {
   const styles = useStyles();
+  const [showDialog, setShowDialog] = useState(false);
+  const [remainingSeconds, setRemainingSeconds] = useState<number>(0);
+
+  useEffect(() => {
+    let timer: number | undefined;
+    if (showDialog) {
+      const start = downloadDialogEnableAfterSeconds && downloadDialogEnableAfterSeconds > 0 ? downloadDialogEnableAfterSeconds : 0;
+      setRemainingSeconds(start);
+      if (start > 0) {
+        timer = window.setInterval(() => {
+          setRemainingSeconds(prev => {
+            if (prev <= 1) {
+              if (timer) window.clearInterval(timer);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      }
+    } else {
+      setRemainingSeconds(0);
+    }
+
+    return () => {
+      if (timer) window.clearInterval(timer);
+    };
+  }, [showDialog, downloadDialogEnableAfterSeconds]);
 
   const getFileIcon = (fileName: string) => {
     if (fileName.includes('.pdf')) return <DocumentPdfRegular style={{ fontSize: '32px' }} />;
@@ -91,9 +126,7 @@ export const FileDetailView: React.FC<FileDetailViewProps> = ({
           <Button
             appearance="primary"
             icon={<ArrowDownloadRegular />}
-            as="a"
-            href={file.url}
-            download
+            onClick={() => setShowDialog(true)}
           >
             下载文件
           </Button>
@@ -105,6 +138,25 @@ export const FileDetailView: React.FC<FileDetailViewProps> = ({
             复制下载链接
           </Button>
         </div>
+        <Dialog open={showDialog} onOpenChange={(_, data) => setShowDialog(data.open)}>
+          <DialogSurface>
+            <DialogTitle>{downloadDialogTitle || '下载'}</DialogTitle>
+            <DialogBody>{downloadDialogContent || `即将下载：${file.name}`}</DialogBody>
+            <DialogActions>
+              <Button appearance="secondary" onClick={() => setShowDialog(false)}>取消</Button>
+              <Button
+                appearance="primary"
+                as="a"
+                href={file.url}
+                download
+                disabled={remainingSeconds > 0}
+                onClick={() => setShowDialog(false)}
+              >
+                {(downloadDialogConfirmLabel || '确定') + (remainingSeconds > 0 ? ` (${remainingSeconds}s)` : '')}
+              </Button>
+            </DialogActions>
+          </DialogSurface>
+        </Dialog>
       </div>
     </div>
   );
