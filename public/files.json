@@ -28,6 +28,19 @@
         "children": [
           {
             "type": "folder",
+            "name": "v5.1",
+            "children": [
+              {
+                "type": "file",
+                "name": "Windows_11_Extended_ProfessionalWorkstation_v5.1_Nicrozoft.iso",
+                "size": "21.20GB",
+                "date": "2025-12-09",
+                "url": "/nz/w11ex/v5.1"
+              }
+            ]
+          },
+          {
+            "type": "folder",
             "name": "v6.0",
             "children": [
               {
